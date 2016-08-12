@@ -9,14 +9,17 @@ C_SRCS := $(shell find $(SRC_ROOT) -name '*.c')
 BUILD_ROOT := build
 C_DEPS := $(C_SRCS:$(SRC_ROOT)/%.c=$(BUILD_ROOT)/%.o)
 
-dist/llvm-statepoint-tablegen.h: dist/llvm-statepoint-tablegen.a $(SRC_ROOT)/include/table.h
+HEADERS := $(shell find $(SRC_ROOT) -name '*.h')
+
+dist/llvm-statepoint-tablegen.h: dist/llvm-statepoint-tablegen.a 
 	cp $(SRC_ROOT)/include/table.h $@
 
 dist/llvm-statepoint-tablegen.a: $(C_DEPS)
 	ar rvs $@ $^
 	
-$(BUILD_ROOT)/%.o: $(SRC_ROOT)/%.c
-	$(CC) $(FLAGS) -c $^ -o $@
+# $< gives first prereq
+$(BUILD_ROOT)/%.o: $(SRC_ROOT)/%.c $(HEADERS)
+	$(CC) $(FLAGS) -c $< -o $@
 
 clean:
 	rm -f build/*
