@@ -11,7 +11,7 @@ typedef struct {
     uint64_t retAddr;
     uint64_t frameSize;     // in bytes
     uint64_t numOffsets;
-    uint64_t *offsets;      // are offsets relative to the stack pointer
+    uint64_t offsets[];      // are offsets relative to the stack pointer
 } frame_info_t;
 
 
