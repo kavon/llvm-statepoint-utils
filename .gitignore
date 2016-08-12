@@ -1,7 +1,3 @@
-# ignored dirs
-build/
-dist/
-
 # Object files
 *.o
 *.ko
