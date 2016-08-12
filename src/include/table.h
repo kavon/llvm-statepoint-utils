@@ -27,6 +27,7 @@ typedef struct {
 } statepoint_table_t;
 
 
+
 /**** Public Functions ****/
 
 /**
@@ -37,6 +38,21 @@ typedef struct {
  *
  */
 frame_info_t* lookup_return_address(statepoint_table_t *table, uint64_t retAddr);
+
+/**
+ * Given an LLVM generated Stack Map, will return a table suitable for
+ * efficient return address lookups by a garbage collector.
+ *
+ */
+statepoint_table_t* generate_table(void* llvm_stack_map);
+
+
+/**
+ * Frees the memory allocated for the table.
+ */
+void destroy_table(statepoint_table_t);
+
+
 
 
 /**** Private Functions ****/
