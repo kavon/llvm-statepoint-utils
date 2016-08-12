@@ -50,7 +50,7 @@ statepoint_table_t* generate_table(void* llvm_stack_map);
 /**
  * Frees the memory allocated for the table.
  */
-void destroy_table(statepoint_table_t);
+void destroy_table(statepoint_table_t* table);
 
 
 

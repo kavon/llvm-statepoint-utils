@@ -5,10 +5,10 @@
 
 statepoint_table_t* generate_table(void* llvm_stack_map) {
     // TODO
-    return NULL
+    return NULL;
 }
 
 
-void destroy_table(statepoint_table_t) {
+void destroy_table(statepoint_table_t* table) {
     // TODO
 }
