@@ -1,7 +1,15 @@
 
+####################
+# Build requirements
+#
+# - We specify as a minimum C99 for flexible array members.
+# - Require compiler support for packed structures via __attribute__((packed))
+#
+
 CC := clang
 OPT := -O3
 FLAGS := -Wall -Werror -pedantic -ansi -std=c99 $(OPT)
+# TODO add -Wextra later
 
 SRC_ROOT := src
 C_SRCS := $(shell find $(SRC_ROOT) -name '*.c')

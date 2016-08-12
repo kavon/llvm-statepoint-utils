@@ -11,7 +11,7 @@ typedef struct {
     uint64_t retAddr;
     uint64_t frameSize;     // in bytes
     uint64_t numOffsets;
-    uint64_t offsets[];      // are offsets relative to the stack pointer
+    int32_t offsets[];      // are offsets relative to the stack pointer
 } frame_info_t;
 
 
@@ -21,9 +21,7 @@ typedef struct {
 } table_bucket_t;
 
 typedef struct {
-    // hashVal AND mask = bucket in table for that entry.
-    // Yes, using modulo may introduce some bias in the table, but this is fast :)
-    uint64_t tableMask; 
+    uint64_t tableSize; 
     table_bucket_t* buckets;
 } statepoint_table_t;
 
@@ -63,7 +61,7 @@ void destroy_table(statepoint_table_t* table);
  * The implementation is one round of the xorshift64* algorithm.
  * Code Source: Wikipedia
  */
-__attribute__((always_inline)) uint64_t hashFn(uint64_t x) {
+__attribute__((always_inline)) inline uint64_t hashFn(uint64_t x) {
     x ^= x >> 12; // a
 	x ^= x << 25; // b
 	x ^= x >> 27; // c
