@@ -42,26 +42,26 @@
  
  ******** END OF LAYOUT ********/
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint8_t version;
     uint8_t reserved1;
     uint16_t reserved2;
     uint32_t numFunctions;
     uint32_t numConstants;
     uint32_t numRecords;
-} stackmap_header_t  __attribute__((packed));
+} stackmap_header_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint64_t address;
     uint64_t stackSize;
-} function_info_t  __attribute__((packed));
+} function_info_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint64_t id;
     uint32_t codeOffset;  // from the entry of the function
     uint16_t flags;
     uint16_t numLocations;
-} callsite_header_t  __attribute__((packed));
+} callsite_header_t;
 
 typedef enum {
     Register = 0x1,
@@ -71,22 +71,22 @@ typedef enum {
     ConstIndex = 0x5
 } location_kind_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint8_t kind;       // possibilities come from location_kind_t, but is one byte in size.
     uint8_t flags;
     uint16_t regNum;    // Dwarf register num
     int32_t offset;     // either an offset or a "Small Constant"
-} value_location_t  __attribute__((packed));
+} value_location_t;
 
-typedef {
+typedef struct __attribute__((packed)) {
     uint16_t padding;
     uint16_t numLiveouts;
-} liveout_header_t  __attribute__((packed));
+} liveout_header_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint16_t regNum;    // Dwarf register num
     uint8_t flags;
     uint8_t size;       // in bytes
-} liveout_location_t __attribute__((packed));
+} liveout_location_t;
 
 #endif /* __LLVM_STATEPOINT_UTILS_STACKMAP__ */

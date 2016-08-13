@@ -6,12 +6,23 @@
 
 /**** Types ****/
 
-// TODO use smaller types where possible?
 typedef struct {
+    // kind < 0 means this is a base pointer
+    // kind >= 0 means this is a pointer derived from base pointer in slot number "kind"
+    int32_t kind;    
+    int32_t offset;  // offsets are relative to the frame's base
+} pointer_slot_t;
+
+typedef struct {
+    // NOTE flags & calling convention didn't seem useful to include in the map.
     uint64_t retAddr;
     uint64_t frameSize;     // in bytes
-    uint64_t numOffsets;
-    int32_t offsets[];      // are offsets relative to the stack pointer
+    
+    // all base pointers come before derived pointers in the slot array. you can use this
+    // fact to quickly update the derived pointers by referring back to the base pointers
+    // while scanning the slots.
+    uint64_t numSlots;
+    pointer_slot_t slots[];  
 } frame_info_t;
 
 
@@ -43,7 +54,7 @@ frame_info_t* lookup_return_address(statepoint_table_t *table, uint64_t retAddr)
  * efficient return address -> pointer location lookups by a garbage collector.
  *
  */
-statepoint_table_t* generate_table(void* llvm_stack_map);
+statepoint_table_t* generate_table(void* map, float load_factor);
 
 
 /**
