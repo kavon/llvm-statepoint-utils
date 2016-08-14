@@ -8,8 +8,8 @@
 
 CC := clang
 OPT := -O3
-FLAGS := -Wall -Werror -pedantic -ansi -std=c99 $(OPT)
-# TODO add -Wextra later
+FLAGS := -Wall -pedantic -ansi -std=c99 $(OPT)
+# TODO add  -Wextra -Werror 
 
 SRC_ROOT := src
 C_SRCS := $(shell find $(SRC_ROOT) -name '*.c')
@@ -20,7 +20,7 @@ C_DEPS := $(C_SRCS:$(SRC_ROOT)/%.c=$(BUILD_ROOT)/%.o)
 HEADERS := $(shell find $(SRC_ROOT) -name '*.h')
 
 dist/llvm-statepoint-tablegen.h: dist/llvm-statepoint-tablegen.a 
-	cp $(SRC_ROOT)/include/table.h $@
+	cp $(SRC_ROOT)/include/api.h $@
 
 dist/llvm-statepoint-tablegen.a: $(C_DEPS)
 	ar rvs $@ $^

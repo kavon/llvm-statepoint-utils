@@ -1,8 +1,5 @@
-#ifndef __LLVM_STATEPOINT_UTILS_TABLE__
-#define __LLVM_STATEPOINT_UTILS_TABLE__
-
-#include "stdint.h"
-#include "stddef.h"
+#ifndef __LLVM_STATEPOINT_UTILS_API__
+#define __LLVM_STATEPOINT_UTILS_API__
 
 /**** Types ****/
 
@@ -32,7 +29,7 @@ typedef struct {
 } table_bucket_t;
 
 typedef struct {
-    uint64_t tableSize; 
+    uint64_t size; 
     table_bucket_t* buckets;
 } statepoint_table_t;
 
@@ -63,21 +60,4 @@ statepoint_table_t* generate_table(void* map, float load_factor);
 void destroy_table(statepoint_table_t* table);
 
 
-
-
-/**** Private Functions ****/
-
-/**
- * The hash function used to distribute keys uniformly across the table.
- * The implementation is one round of the xorshift64* algorithm.
- * Code Source: Wikipedia
- */
-__attribute__((always_inline)) inline uint64_t hashFn(uint64_t x) {
-    x ^= x >> 12; // a
-	x ^= x << 25; // b
-	x ^= x >> 27; // c
-	return x * UINT64_C(2685821657736338717);
-}
-
-
-#endif /* __LLVM_STATEPOINT_UTILS_TABLE__ */
+#endif /* __LLVM_STATEPOINT_UTILS_API__ */

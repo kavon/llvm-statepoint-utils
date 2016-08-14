@@ -1,8 +1,8 @@
 #ifndef __LLVM_STATEPOINT_UTILS_STACKMAP__
 #define __LLVM_STATEPOINT_UTILS_STACKMAP__
 
-#include "stdint.h"
-#include "stddef.h"
+#include <stdint.h>
+#include <stddef.h>
 
 /** 
  * LLVM's Documentation: http://llvm.org/docs/StackMaps.html#stack-map-format
@@ -54,6 +54,7 @@ typedef struct __attribute__((packed)) {
 typedef struct __attribute__((packed)) {
     uint64_t address;
     uint64_t stackSize;
+    uint32_t callsiteCount;   // see https://reviews.llvm.org/D23487
 } function_info_t;
 
 typedef struct __attribute__((packed)) {
