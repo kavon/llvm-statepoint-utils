@@ -39,19 +39,12 @@ statepoint_table_t* generate_table(void* map, float load_factor) {
 
         frame_info_t* info = generate_frame_info(callsite, currentFn);
         
-        // TODO add the frame to a bucket etc.
+        insert_key(table, info->retAddr, info);
         
         // setup next iteration
         callsite = next_callsite(callsite);
         visited++;
     }
     
-    
-    
-    return NULL;
-}
-
-
-void destroy_table(statepoint_table_t* table) {
-    // TODO
+    return table;
 }

@@ -34,6 +34,23 @@ statepoint_table_t* new_table(float loadFactor, uint64_t expectedElms) {
     return table;
 }
 
+
+void destroy_table(statepoint_table_t* table) {
+    for(uint64_t i = 0; i < table->size; i++) {
+        frame_info_t* entry = table->buckets[i].entries;
+        if(entry != NULL) {
+            free(entry);
+        }
+    }
+    free(table->buckets);
+    free(table);
+}
+
+
+void insert_key(statepoint_table_t* table, uint64_t key, frame_info_t* value) {
+    // TODO
+}
+
 frame_info_t* lookup_return_address(statepoint_table_t *table, uint64_t retAddr) {
     // NOTE using modulo may introduce a little bias in the table.
     uint64_t idx = hashFn(retAddr) % (table->size);
