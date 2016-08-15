@@ -141,6 +141,9 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
         // new iteration
         currentSlot++;
     }
+    
+    // there is no liveout information emitted for statepoints, and we place faith in 
+    // the input on that being the case
 
     return frame;
 }
