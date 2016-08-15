@@ -25,6 +25,7 @@ typedef struct {
 
 typedef struct {
     uint16_t numEntries;
+    size_t sizeOfEntries; // total memory footprint of the entries
     frame_info_t* entries;
 } table_bucket_t;
 
@@ -60,6 +61,5 @@ statepoint_table_t* generate_table(void* map, float load_factor);
  * pointers returned from a lookup are invalid after this call.
  */
 void destroy_table(statepoint_table_t* table);
-
 
 #endif /* __LLVM_STATEPOINT_UTILS_API__ */
