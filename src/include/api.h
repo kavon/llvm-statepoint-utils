@@ -1,6 +1,9 @@
 #ifndef __LLVM_STATEPOINT_UTILS_API__
 #define __LLVM_STATEPOINT_UTILS_API__
 
+#include <stdio.h>
+#include <stdint.h>
+
 /**** Types ****/
 
 typedef struct {
@@ -61,5 +64,12 @@ statepoint_table_t* generate_table(void* map, float load_factor);
  * pointers returned from a lookup are invalid after this call.
  */
 void destroy_table(statepoint_table_t* table);
+
+
+// debugging functions
+
+void print_table(FILE *stream, statepoint_table_t* table);
+
+void print_frame(FILE *stream, frame_info_t* frame);
 
 #endif /* __LLVM_STATEPOINT_UTILS_API__ */
