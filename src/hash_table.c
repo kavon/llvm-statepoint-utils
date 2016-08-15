@@ -55,16 +55,6 @@ void destroy_table(statepoint_table_t* table) {
 }
 
 
-inline size_t frame_size(frame_info_t* frame) {
-    return sizeof(frame_info_t) + frame->numSlots * sizeof(pointer_slot_t);
-}
-
-// returns the next frame relative the current frame
-inline frame_info_t* next_frame(frame_info_t* cur) {
-    uint8_t* next = ((uint8_t*)cur) + frame_size(cur);
-    return (frame_info_t*)next;
-}
-
 // NOTE value must be a base pointer to a malloc operation, and the act of inserting
 // the key is considered the final use of the pointer (i.e., value will be freed by the
 // function).

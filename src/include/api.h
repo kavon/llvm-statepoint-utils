@@ -18,7 +18,7 @@ typedef struct {
     // all base pointers come before derived pointers in the slot array. you can use this
     // fact to quickly update the derived pointers by referring back to the base pointers
     // while scanning the slots.
-    uint64_t numSlots;
+    uint16_t numSlots;
     pointer_slot_t slots[];  
 } frame_info_t;
 

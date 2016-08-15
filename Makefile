@@ -8,8 +8,8 @@
 
 CC := clang
 OPT := -O3
-FLAGS := -Wall -pedantic -ansi -std=c99 $(OPT)
-# TODO add  -Wextra -Werror 
+FLAGS := -Wall -Wextra -Wpedantic -std=c99 $(OPT)
+# TODO add -Werror 
 
 SRC_ROOT := src
 C_SRCS := $(shell find $(SRC_ROOT) -name '*.c')
