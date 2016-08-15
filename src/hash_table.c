@@ -65,7 +65,9 @@ inline frame_info_t* next_frame(frame_info_t* cur) {
     return (frame_info_t*)next;
 }
 
-// NOTE the frame may or may not be copied when inserted into the table.
+// NOTE value must be a base pointer to a malloc operation, and the act of inserting
+// the key is considered the final use of the pointer (i.e., value will be freed by the
+// function).
 void insert_key(statepoint_table_t* table, uint64_t key, frame_info_t* value) {
     uint64_t idx = computeBucketIndex(table, key);
     table_bucket_t *bucket = table->buckets + idx;
@@ -89,6 +91,8 @@ void insert_key(statepoint_table_t* table, uint64_t key, frame_info_t* value) {
         );
         
         memmove(oldEnd, value, frame_size(value));
+        
+        free(value);
         
         bucket->entries = newEntries;
         bucket->sizeOfEntries = newSize;
