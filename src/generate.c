@@ -26,14 +26,14 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
     // on we check that they're constants.
     for(uint16_t i = 0; i < 2; i++) {
         assert(locations->kind == Constant 
-            && "first 3 locations must be constants in statepoint stackmaps");
+            && "first 2 locations must be constants in statepoint stackmaps");
         locations++;
         numLocations--;
     }
     
     // the 3rd constant describes the number of "deopt" parameters
     // that we should skip over.
-    assert(locations->kind == Constant && "this should be a constant");
+    assert(locations->kind == Constant && "3rd location should be a constant");
     int32_t numDeopt = locations->offset;
     locations++;
     numLocations--;
