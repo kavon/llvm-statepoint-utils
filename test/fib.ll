@@ -44,10 +44,20 @@ doGC:
                   
     %boxedVal.afterGCRelo = call i32 addrspace(1)*  
               @llvm.experimental.gc.relocate.p1i32(token %gcRetTok, i32 7, i32 7)
+              
+    ; reset the count
+    store i32 0, i32* @gcCounter
+    
     br label %afterCheck
     
 afterCheck: 
   %boxedVal = phi i32 addrspace(1)* [%boxedVal.afterGCRelo, %doGC], [%boxedValParam, %entry]
+  
+  ; increment the count
+  %z1 = load i32, i32* @gcCounter
+  %z2 = add i32 %z1, 1
+  store i32 %z2, i32* @gcCounter
+  
   %r1 = load i32, i32 addrspace(1)* %boxedVal, align 4
   %r2 = icmp sle i32 %r1, 1
   br i1 %r2, label %r3, label %r4
