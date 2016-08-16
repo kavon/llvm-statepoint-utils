@@ -6,60 +6,123 @@ target triple = "x86_64-apple-macosx10.11.0"
 @heapPtr = common global i32 addrspace(1)* null, align 8
 @.str = private unnamed_addr constant [14 x i8] c"fib(%d) = %d\0A\00", align 1
 
+declare token @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
+declare i32 addrspace(1)* @llvm.experimental.gc.result.p1i32(token)
+declare i32 addrspace(1)*  @llvm.experimental.gc.relocate.p1i32(token, i32, i32) ; base idx, pointer idx
+
 ; Function Attrs: nounwind ssp uwtable
 define i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedVal) #0 gc "statepoint-example" {
-  %1 = load i32, i32 addrspace(1)* %boxedVal, align 4
-  %2 = icmp sle i32 %1, 1
-  br i1 %2, label %3, label %4
+  %r1 = load i32, i32 addrspace(1)* %boxedVal, align 4
+  %r2 = icmp sle i32 %r1, 1
+  br i1 %r2, label %r3, label %r4
 
-; <label>:3:                                      ; preds = %0
-  br label %23
+r3:
+  br label %r23
 
-; <label>:4:                                      ; preds = %0
-  %5 = load i32, i32 addrspace(1)* %boxedVal, align 4
-  %6 = sub nsw i32 %5, 1
-  %7 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  store i32 %6, i32 addrspace(1)* %7, align 4
-  %8 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  %9 = getelementptr inbounds i32, i32 addrspace(1)* %8, i32 1
-  store i32 addrspace(1)* %9, i32 addrspace(1)** @heapPtr, align 8
-  %10 = call i32 addrspace(1)* @fib(i32 addrspace(1)* %7)
-  %11 = load i32, i32 addrspace(1)* %boxedVal, align 4
-  %12 = sub nsw i32 %11, 2
-  %13 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  store i32 %12, i32 addrspace(1)* %13, align 4
-  %14 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  %15 = getelementptr inbounds i32, i32 addrspace(1)* %14, i32 1
-  store i32 addrspace(1)* %15, i32 addrspace(1)** @heapPtr, align 8
-  %16 = call i32 addrspace(1)* @fib(i32 addrspace(1)* %13)
-  %17 = load i32, i32 addrspace(1)* %10, align 4
-  %18 = load i32, i32 addrspace(1)* %16, align 4
-  %19 = add nsw i32 %17, %18
-  %20 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  store i32 %19, i32 addrspace(1)* %20, align 4
-  %21 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  %22 = getelementptr inbounds i32, i32 addrspace(1)* %21, i32 1
-  store i32 addrspace(1)* %22, i32 addrspace(1)** @heapPtr, align 8
-  br label %23
+r4:
+  %r5 = load i32, i32 addrspace(1)* %boxedVal, align 4
+  %r6 = sub nsw i32 %r5, 1
+  %r7 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  store i32 %r6, i32 addrspace(1)* %r7, align 4
+  %r8 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  %r9 = getelementptr inbounds i32, i32 addrspace(1)* %r8, i32 1
+  store i32 addrspace(1)* %r9, i32 addrspace(1)** @heapPtr, align 8
+  
+  ; %r10 = call i32 addrspace(1)* @fib(i32 addrspace(1)* %r7)
+  
+  %retTok = call token
+            (i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
+            @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(
+                i64 0,      ; id
+                i32 0,      ; patch bytes 
+                
+                i32 addrspace(1)* (i32 addrspace(1)*)* @fib,    ; function
+                i32 1, ; function's arity
+                
+                i32 0, ; "flags"
+                ; start of args
+                
+                i32 addrspace(1)* %r7,
+                
+                ; end of args
+                i32 0, ; # "transition" args, followed by them if any
+                i32 0, ; # deopt args, followed by them if any
+                
+                ; start of live heap pointers that the GC needs to know about.
+                i32 addrspace(1)* %boxedVal
+                
+                )
+                
+  %fib_minusOne = call i32 addrspace(1)* @llvm.experimental.gc.result.p1i32(token %retTok)
+  %boxedVal.relo = call i32 addrspace(1)*  
+            @llvm.experimental.gc.relocate.p1i32(token %retTok, i32 8, i32 8)
+  
+  
+  %r11 = load i32, i32 addrspace(1)* %boxedVal.relo, align 4
+  %r12 = sub nsw i32 %r11, 2
+  %r13 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  store i32 %r12, i32 addrspace(1)* %r13, align 4
+  %r14 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  %r15 = getelementptr inbounds i32, i32 addrspace(1)* %r14, i32 1
+  store i32 addrspace(1)* %r15, i32 addrspace(1)** @heapPtr, align 8
+  
+  ; %r16 = call i32 addrspace(1)* @fib(i32 addrspace(1)* %r13)
+  
+  %retTok2 = call token
+            (i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
+            @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(
+                i64 0,      ; id
+                i32 0,      ; patch bytes 
+                
+                i32 addrspace(1)* (i32 addrspace(1)*)* @fib,    ; function
+                i32 1, ; function's arity
+                
+                i32 0, ; "flags"
+                ; start of args
+                
+                i32 addrspace(1)* %r13,
+                
+                ; end of args
+                i32 0, ; # "transition" args, followed by them if any
+                i32 0, ; # deopt args, followed by them if any
+                
+                ; start of live heap pointers that the GC needs to know about.
+                i32 addrspace(1)* %fib_minusOne
+                
+                )
+                
+  %fib_minusTwo = call i32 addrspace(1)* @llvm.experimental.gc.result.p1i32(token %retTok2)
+  %fib_minusOne.relo = call i32 addrspace(1)*  
+            @llvm.experimental.gc.relocate.p1i32(token %retTok2, i32 8, i32 8)
+  
+  %r17 = load i32, i32 addrspace(1)* %fib_minusOne.relo, align 4
+  %r18 = load i32, i32 addrspace(1)* %fib_minusTwo, align 4
+  %r19 = add nsw i32 %r17, %r18
+  %r20 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  store i32 %r19, i32 addrspace(1)* %r20, align 4
+  %r21 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  %r22 = getelementptr inbounds i32, i32 addrspace(1)* %r21, i32 1
+  store i32 addrspace(1)* %r22, i32 addrspace(1)** @heapPtr, align 8
+  br label %r23
 
-; <label>:23:                                     ; preds = %4, %3
-  %.0 = phi i32 addrspace(1)* [ %boxedVal, %3 ], [ %20, %4 ]
+r23:
+  %.0 = phi i32 addrspace(1)* [ %boxedVal, %r3 ], [ %r20, %r4 ]
   ret i32 addrspace(1)* %.0
 }
 
 ; Function Attrs: nounwind ssp uwtable
 define i32 @main() #0 gc "statepoint-example" {
-  %1 = call i8 addrspace(1)* @malloc(i64 12288)
-  %2 = bitcast i8 addrspace(1)* %1 to i32 addrspace(1)*
-  store i32 addrspace(1)* %2, i32 addrspace(1)** @heapPtr, align 8
-  %3 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  store i32 9, i32 addrspace(1)* %3, align 4
-  %4 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  %5 = getelementptr inbounds i32, i32 addrspace(1)* %4, i32 1
-  store i32 addrspace(1)* %5, i32 addrspace(1)** @heapPtr, align 8
-  %6 = call i32 addrspace(1)* @fib(i32 addrspace(1)* %3)
-  %7 = load i32, i32 addrspace(1)* %6, align 4
-  %8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str, i32 0, i32 0), i32 9, i32 %7)
+  %r1 = call i8 addrspace(1)* @malloc(i64 12288)
+  %r2 = bitcast i8 addrspace(1)* %r1 to i32 addrspace(1)*
+  store i32 addrspace(1)* %r2, i32 addrspace(1)** @heapPtr, align 8
+  %r3 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  store i32 9, i32 addrspace(1)* %r3, align 4
+  %r4 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
+  %r5 = getelementptr inbounds i32, i32 addrspace(1)* %r4, i32 1
+  store i32 addrspace(1)* %r5, i32 addrspace(1)** @heapPtr, align 8
+  %r6 = call i32 addrspace(1)* @fib(i32 addrspace(1)* %r3)
+  %r7 = load i32, i32 addrspace(1)* %r6, align 4
+  %r8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str, i32 0, i32 0), i32 9, i32 %r7)
   ret i32 0
 }
 
