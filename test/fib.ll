@@ -3,14 +3,51 @@ target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-macosx10.11.0"
 
 @heapPtr = common global i32 addrspace(1)* null, align 8
+@gcCounter = common global i32 0, align 8
 @.str = private unnamed_addr constant [14 x i8] c"fib(%d) = %d\0A\00", align 1
 
+declare void @enterGC()
+
+declare token @llvm.experimental.gc.statepoint.p0f_voidvoidf(i64, i32, void ()*, i32, i32, ...)
 declare token @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
 declare i32 addrspace(1)* @llvm.experimental.gc.result.p1i32(token)
 declare i32 addrspace(1)*  @llvm.experimental.gc.relocate.p1i32(token, i32, i32) ; base idx, pointer idx
 
 ; Function Attrs: nounwind ssp uwtable
-define i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedVal) #0 gc "statepoint-example" {
+define i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedValParam) #0 gc "statepoint-example" {
+entry:
+    %count = load i32, i32* @gcCounter
+    %cond = icmp sgt i32 %count, 10
+    br i1 %cond, label %doGC, label %afterCheck
+    
+doGC:
+    %gcRetTok = call token
+              (i64, i32, void ()*, i32, i32, ...)
+              @llvm.experimental.gc.statepoint.p0f_voidvoidf(
+                  i64 0,      ; id
+                  i32 0,      ; patch bytes 
+                  
+                  void ()* @enterGC,    ; function
+                  i32 0, ; function's arity
+                  
+                  i32 0, ; "flags"
+                  ; start of args
+                  
+                  ; end of args
+                  i32 0, ; # "transition" args, followed by them if any
+                  i32 0, ; # deopt args, followed by them if any
+                  
+                  ; start of live heap pointers that the GC needs to know about.
+                  i32 addrspace(1)* %boxedValParam
+                  
+                  )
+                  
+    %boxedVal.afterGCRelo = call i32 addrspace(1)*  
+              @llvm.experimental.gc.relocate.p1i32(token %gcRetTok, i32 7, i32 7)
+    br label %afterCheck
+    
+afterCheck: 
+  %boxedVal = phi i32 addrspace(1)* [%boxedVal.afterGCRelo, %doGC], [%boxedValParam, %entry]
   %r1 = load i32, i32 addrspace(1)* %boxedVal, align 4
   %r2 = icmp sle i32 %r1, 1
   br i1 %r2, label %r3, label %r4
