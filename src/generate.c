@@ -185,7 +185,7 @@ statepoint_table_t* generate_table(void* map, float load_factor) {
     
     
     function_info_t* currentFn = functions;
-    uint32_t visited = 0;
+    uint64_t visited = 0;
     for(uint64_t _unused = 0; _unused < numCallsites; _unused++) {
         if(visited >= currentFn->callsiteCount) {
             currentFn++;

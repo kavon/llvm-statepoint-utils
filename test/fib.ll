@@ -24,7 +24,7 @@ doGC:
     %gcRetTok = call token
               (i64, i32, void ()*, i32, i32, ...)
               @llvm.experimental.gc.statepoint.p0f_voidvoidf(
-                  i64 0,      ; id
+                  i64 1,      ; id
                   i32 0,      ; patch bytes 
                   
                   void ()* @enterGC,    ; function
@@ -79,7 +79,7 @@ r4:
   %retTok = call token
             (i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
             @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(
-                i64 0,      ; id
+                i64 2,      ; id
                 i32 0,      ; patch bytes 
                 
                 i32 addrspace(1)* (i32 addrspace(1)*)* @fib,    ; function
@@ -117,7 +117,7 @@ r4:
   %retTok2 = call token
             (i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
             @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(
-                i64 0,      ; id
+                i64 3,      ; id
                 i32 0,      ; patch bytes 
                 
                 i32 addrspace(1)* (i32 addrspace(1)*)* @fib,    ; function

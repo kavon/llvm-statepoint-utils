@@ -54,7 +54,7 @@ typedef struct __attribute__((packed)) {
 typedef struct __attribute__((packed)) {
     uint64_t address;
     uint64_t stackSize;
-    uint32_t callsiteCount;   // see https://reviews.llvm.org/D23487
+    uint64_t callsiteCount;   // see https://reviews.llvm.org/D23487
 } function_info_t;
 
 typedef struct __attribute__((packed)) {
