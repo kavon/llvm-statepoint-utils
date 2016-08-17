@@ -119,15 +119,17 @@ frame_info_t* lookup_return_address(statepoint_table_t *table, uint64_t retAddr)
     return NULL;
 }
 
-void print_table(FILE *stream, statepoint_table_t* table) {
+void print_table(FILE *stream, statepoint_table_t* table, bool skip_empty) {
     for(uint64_t i = 0; i < table->size; i++) {
-        fprintf(stream, "\n--- bucket #%" PRIu64 "---\n", i);
-        
-        
         uint16_t numEntries = table->buckets[i].numEntries;
         size_t sizeOfEntries = table->buckets[i].sizeOfEntries;
         frame_info_t* entry = table->buckets[i].entries;
         
+        if(skip_empty && numEntries == 0) {
+            continue;
+        }
+        
+        fprintf(stream, "\n--- bucket #%" PRIu64 "---\n", i);
         fprintf(stream, "num entries: %" PRIu16 ", ", numEntries);
         fprintf(stream, "memory allocated (bytes): %" PRIuPTR "\n", sizeOfEntries);
         
@@ -140,7 +142,7 @@ void print_table(FILE *stream, statepoint_table_t* table) {
 }
 
 void print_frame(FILE *stream, frame_info_t* frame) {
-    fprintf(stream, "\t\treturn address: %" PRIu64 "\n", frame->retAddr);
+    fprintf(stream, "\t\treturn address: 0x%" PRIX64 "\n", frame->retAddr);
     fprintf(stream, "\t\tframe size: %" PRIu64 "\n", frame->frameSize);
     
     uint16_t numSlots = frame->numSlots;

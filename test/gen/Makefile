@@ -1,6 +1,4 @@
 
-INTERMEDIATES := 
-
 all: starter.ll main
 
 main: main.c

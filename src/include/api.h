@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /**** Types ****/
 
@@ -52,8 +53,14 @@ typedef struct {
 frame_info_t* lookup_return_address(statepoint_table_t *table, uint64_t retAddr);
 
 /**
- * Given an LLVM generated Stack Map, will return a table suitable for
- * efficient return address -> pointer location lookups by a garbage collector.
+ * Given an LLVM generated Stack Map, will returns a hash table mapping return addresses
+ * to a frame_info_t struct that provides information about live pointer locations within
+ * that stack frame. 
+ *
+ * - The map is the LLVM Stack Map generated via gc.statepoint.
+ * - The load factor allows you to tune the amount of hash collisions in the table. Lower
+ * values help prevent collisions, helping lookup times, at the cost of increasing
+ * the size of the table.
  *
  */
 statepoint_table_t* generate_table(void* map, float load_factor);
@@ -61,15 +68,18 @@ statepoint_table_t* generate_table(void* map, float load_factor);
 
 /**
  * Frees _all_ allocated memory reachable from the table. Thus, any
- * pointers returned from a lookup are invalid after this call.
+ * pointers returned from a previous lookup are invalid after this call.
  */
 void destroy_table(statepoint_table_t* table);
 
 
-// debugging functions
 
-void print_table(FILE *stream, statepoint_table_t* table);
+/**** Debugging Functions ****/
 
+// skip_empty will skip printing out empty buckets
+void print_table(FILE *stream, statepoint_table_t* table, bool skip_empty);
+
+// the function print_table uses to print an individual frame, useful for debugging.
 void print_frame(FILE *stream, frame_info_t* frame);
 
 #endif /* __LLVM_STATEPOINT_UTILS_API__ */
