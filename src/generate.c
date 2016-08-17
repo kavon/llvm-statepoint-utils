@@ -25,7 +25,7 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
     // the first 2 locations are constants we dont care about, but if asserts are
     // on we check that they're constants.
     for(uint16_t i = 0; i < 2; i++) {
-        printf("location kind: %u, addr: %llu\n", locations->kind, (unsigned long long)locations);
+        // printf("location kind: %u, addr: %llu\n", locations->kind, (unsigned long long)locations);
         assert(locations->kind == Constant 
             && "first 2 locations must be constants in statepoint stackmaps");
         locations++;
@@ -65,7 +65,7 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
     */
     
     
-    assert((numLocations & 2) == 0 && "all of the pointer locations come in pairs!");
+    assert((numLocations % 2) == 0 && "all of the pointer locations come in pairs!");
     uint16_t numSlots = numLocations / 2; 
     
     frame_info_t* frame = malloc(size_of_frame(numSlots));
