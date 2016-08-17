@@ -83,11 +83,7 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
         value_location_t* derived = (value_location_t*)(locations + 1);
         
         // we check that all locations are indirects.
-        if( ! (isIndirect(base) && isIndirect(derived)) ) {
-            // it is expected that all pointers were saved to the stack and
-            // are not in a register!
-            exit(EXIT_FAILURE);
-        }
+        assert(isIndirect(base) && isIndirect(derived) && "uh oh");
         
         if( ! isBasePointer(base, derived)) {
             continue;
@@ -128,10 +124,8 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
             }
         }
         
-        if(!found) {
-            // something's gone awry, let's bail!
-            exit(EXIT_FAILURE);
-        }
+        // something's gone awry, let's bail!
+        assert(found && "uh oh");
         
         // save the derived pointer's info
         pointer_slot_t newSlot;

@@ -9,9 +9,9 @@ int callCount = 0;
 void enterGC() {
     void* stackmap = (void*)&_LLVM_StackMaps;
     
-    
     if(callCount == 0) {
-        statepoint_table_t* table = generate_table(stackmap, 2.0);
+        printf("printing the table...\n");
+        statepoint_table_t* table = generate_table(stackmap, 0.5);
         print_table(stdout, table);
         
         // printf("stackmap at %llu\n", (unsigned long long)stackmap);

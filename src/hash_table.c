@@ -44,14 +44,10 @@ statepoint_table_t* new_table(float loadFactor, uint64_t expectedElms) {
     uint64_t numBuckets = (expectedElms / loadFactor) + 1;
     
     table_bucket_t* buckets = calloc(numBuckets, sizeof(table_bucket_t));
-    if(buckets == NULL) {
-        exit(EXIT_FAILURE);
-    }
+    assert(buckets && "bad alloc");
     
     statepoint_table_t* table = malloc(sizeof(statepoint_table_t));
-    if(table == NULL) {
-        exit(EXIT_FAILURE);
-    }
+    assert(table && "bad alloc");
     
     table->size = numBuckets;
     table->buckets = buckets;
@@ -88,9 +84,7 @@ void insert_key(statepoint_table_t* table, uint64_t key, frame_info_t* value) {
         size_t newSize = bucket->sizeOfEntries + frame_size(value);
         frame_info_t* newEntries = realloc(bucket->entries, newSize);
         
-        if(newEntries == NULL) {
-            exit(EXIT_FAILURE);
-        }
+        assert(newEntries && "bad alloc");
         
         // copy value onto the end of the possibly resized entry array
         frame_info_t* oldEnd = (frame_info_t*)(
@@ -142,6 +136,7 @@ void print_table(FILE *stream, statepoint_table_t* table) {
             print_frame(stream, entry);
         }
     }
+    fflush(stream);
 }
 
 void print_frame(FILE *stream, frame_info_t* frame) {
