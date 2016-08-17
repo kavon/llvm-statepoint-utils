@@ -75,7 +75,7 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
     
     // now to initialize the slots, we need to make two passes in order to put
     // base pointers first, then derived pointers.
-    
+    value_location_t *start = locations;
     uint16_t numBasePtrs = 0;
     pointer_slot_t* currentSlot = frame->slots;
     for(uint16_t i = 0; i < numSlots; i++, locations += 2) {
@@ -102,7 +102,7 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
     }
     
     // now we do the derived pointers. we already know all locations are indirects now.
-    
+    locations = start;
     pointer_slot_t* processedBase = frame->slots;
     for(uint16_t i = 0; i < numSlots; i++, locations += 2) {
         value_location_t* base = (value_location_t*)(locations);
