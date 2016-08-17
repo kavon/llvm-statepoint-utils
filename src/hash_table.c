@@ -125,14 +125,14 @@ void print_table(FILE *stream, statepoint_table_t* table) {
         
         
         uint16_t numEntries = table->buckets[i].numEntries;
-        size_t sizeOfEntries = table->buckets[i].numEntries;
+        size_t sizeOfEntries = table->buckets[i].sizeOfEntries;
         frame_info_t* entry = table->buckets[i].entries;
         
         fprintf(stream, "num entries: %" PRIu16 ", ", numEntries);
         fprintf(stream, "memory allocated (bytes): %" PRIuPTR "\n", sizeOfEntries);
         
         for(uint16_t i = 0; i < numEntries; i++, entry = next_frame(entry)) {
-            fprintf(stream, "** frame #%" PRIu16 "**\n", i);
+            fprintf(stream, "\t** frame #%" PRIu16 "**\n", i);
             print_frame(stream, entry);
         }
     }
@@ -140,15 +140,15 @@ void print_table(FILE *stream, statepoint_table_t* table) {
 }
 
 void print_frame(FILE *stream, frame_info_t* frame) {
-    fprintf(stream, "return address: %" PRIu64 "\n", frame->retAddr);
-    fprintf(stream, "frame size: %" PRIu64 "\n", frame->frameSize);
+    fprintf(stream, "\t\treturn address: %" PRIu64 "\n", frame->retAddr);
+    fprintf(stream, "\t\tframe size: %" PRIu64 "\n", frame->frameSize);
     
     uint16_t numSlots = frame->numSlots;
     pointer_slot_t* curSlot = frame->slots;
-    fprintf(stream, "num live ptrs: %" PRIu16 "\n", numSlots);
+    fprintf(stream, "\t\tnum live ptrs: %" PRIu16 "\n", numSlots);
     
     for(uint16_t i = 0; i < numSlots; i++, curSlot++) {
-        fprintf(stream, "ptr slot #%" PRIu16 " { ", i);
+        fprintf(stream, "\t\tptr slot #%" PRIu16 " { ", i);
         
         int32_t kind = curSlot->kind;
         if(kind < 0) {
