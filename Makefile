@@ -7,7 +7,8 @@
 #
 
 CC := clang
-OPT := -O3
+#OPT := -O3
+OPT := -g
 FLAGS := -Wall -Wextra -Wpedantic -std=c99 $(OPT)
 # TODO add -Werror 
 

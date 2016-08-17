@@ -2,12 +2,12 @@
 #include "include/hash_table.h"
 #include <stdbool.h>
 
-inline bool isBasePointer(value_location_t* first, value_location_t* second) {
+bool isBasePointer(value_location_t* first, value_location_t* second) {
     return first->kind == second->kind 
            && first->offset == second->offset;
 }
 
-inline bool isIndirect(value_location_t* p) {
+bool isIndirect(value_location_t* p) {
     return p->kind == Indirect;
 }
 
