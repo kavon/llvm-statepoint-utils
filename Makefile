@@ -7,8 +7,8 @@
 #
 
 CC := clang
-#OPT := -O3
-OPT := -g
+OPT := -O3
+#OPT := -g
 FLAGS := -Wall -Wextra -Werror -Wpedantic -std=c99 $(OPT)
 
 SRC_ROOT := src
