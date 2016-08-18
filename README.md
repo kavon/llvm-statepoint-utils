@@ -9,12 +9,14 @@ This design is [intentional](http://llvm.org/docs/StackMaps.html#stack-map-forma
 encode the information in its own format."
 
 The utilities herein are designed to do just that: it can generate an efficient hash table at runtime that can be used by a garbage collector to walk the stack and find all pointers. 
-Generating the table at runtime works around issues with position independent code, or if that is disabled, having to do fancy linker tricks, since the table is keyed on absolute return addresses. 
+Generating the table at runtime works around [issues](https://en.wikipedia.org/wiki/Address_space_layout_randomization) with position independent code, or if that is disabled, having to do fancy linker tricks, since the table is keyed on absolute return addresses. 
 The code is pure, unadulterated C99<sup>[*](#caveat)</sup> with no dependencies and a permissive license.
 
 Note that this library was designed to work for programs whose stack map information was generated solely by ``gc.statepoint`` intrinsics, as these intrinsics generate specially formatted stack map records. If you're mixing ``patchpoint`` or regular ``stackmap`` intrinsics in the same code, you might need to modify the library in addition to marking call sites to differentiate them from statepoints.
 
 #### how to build and use
+
+**NOTE: This code depends on a patch not yet merged into LLVM (see: https://reviews.llvm.org/D23487 )**
 
 1. Run ``make``
 2. Look inside ``dist`` and you should see a library file and a header file
