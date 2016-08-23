@@ -6,6 +6,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+// for PRIu and PRId
+#define __STDC_FORMAT_MACROS 1
+#include <inttypes.h>
+
 extern uint8_t _LLVM_StackMaps[];
 extern uint64_t heapSizeB;
 extern uint32_t* heapBase;
@@ -17,7 +21,10 @@ statepoint_table_t* table;
 uint32_t* auxHeap;
 
 void relocate_uint32star(uint32_t** slot, uint32_t** heapPtr) {
-    // TODO
+    uint32_t* newSlot = *heapPtr;
+    *newSlot = **slot; // move val
+    *slot = newSlot; // update the slot in stack frame
+    *heapPtr = (*heapPtr) + 1; // increment heap ptr
 }
 
 
@@ -38,9 +45,10 @@ void doGC(uint8_t* stackPtr) {
         memset(auxHeap, 0xFF, heapSizeB); 
     }
     
-    printf("\n--- starting to scan the stack for gc ---\n");
+    printf("\n\n--- starting to scan the stack for gc ---\n");
     
     uint64_t retAddr = *((uint64_t*)stackPtr);
+    printf("frame return address: 0x%" PRIX64 "\n", retAddr);
     frame_info_t* frame = lookup_return_address(table, retAddr);
     
     // we'll be moving live stuff to the current aux heap
@@ -48,7 +56,9 @@ void doGC(uint8_t* stackPtr) {
     uint32_t* newHeapPtr = auxHeap;
     
     while(frame != NULL) {
-        printf("found a frame, relocating its ptrs\n");
+        
+        printf("\t... relocating\n");
+        
         for(uint16_t i = 0; i < frame->numSlots; i++) {
             pointer_slot_t ptrSlot = frame->slots[i];
             if(ptrSlot.kind >= 0) {
@@ -59,14 +69,21 @@ void doGC(uint8_t* stackPtr) {
             relocate_uint32star(ptr, &newHeapPtr);
         }
         
-        // move to next frame
-        stackPtr = stackPtr + frame->frameSize;
+        printf("\tdone.\n");
+        
+        // move to next frame. seems we have to add one pointer size to
+        // reach the next return address? NOTE
+        stackPtr = stackPtr + frame->frameSize + sizeof(uint64_t*); 
+        
         retAddr = *((uint64_t*)stackPtr);
+        printf("frame return address: 0x%" PRIX64 "\n", retAddr);
         frame = lookup_return_address(table, retAddr);
     }
     
+    printf("finished!\n");
+    
     // swap spaces
-    /* TODO only enable this once you correctly relocate everything!
+    /* TODO only enable this once you correctly relocate everything! 
     auxHeap = heapBase;
     heapBase = newBase;
     heapPtr = newHeapPtr;
