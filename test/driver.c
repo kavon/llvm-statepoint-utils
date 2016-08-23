@@ -35,13 +35,16 @@ void doGC(uint8_t* stackPtr) {
     
     // TODO make a new heap to relocate stuff to
     
-    frame_info_t* frame = lookup_return_address(table, (uint64_t)stackPtr);
+    uint64_t retAddr = *((uint64_t*)stackPtr);
+    frame_info_t* frame = lookup_return_address(table, retAddr);
+    
+    printf("\n--- starting to scan the stack for gc ---\n");
     
     while(frame != NULL) {
         printf("found a frame, relocating its ptrs\n");
         for(uint16_t i = 0; i < frame->numSlots; i++) {
             pointer_slot_t ptrSlot = frame->slots[i];
-            if(ptrSlot.kind < 0) {
+            if(ptrSlot.kind >= 0) {
                 assert(false && "unexpected derived pointer\n");
             }
             uint32_t** ptr = (uint32_t**)(stackPtr + ptrSlot.offset);
@@ -49,8 +52,9 @@ void doGC(uint8_t* stackPtr) {
         }
         
         // move to next frame
-        stackPtr += frame->frameSize;
-        frame = lookup_return_address(table, (uint64_t)stackPtr);
+        stackPtr = stackPtr + frame->frameSize;
+        retAddr = *((uint64_t*)stackPtr);
+        frame = lookup_return_address(table, retAddr);
     }
     
     // TODO free the old heap and make new heap the current heap.
