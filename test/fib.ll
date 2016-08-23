@@ -20,7 +20,7 @@ declare i32 addrspace(1)*  @llvm.experimental.gc.relocate.p1i32(token, i32, i32)
 define i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedValParam) #0 gc "statepoint-example" {
 entry:
     %count = load i32, i32* @gcCounter
-    %cond = icmp sgt i32 %count, 10
+    %cond = icmp sgt i32 %count, 11
     br i1 %cond, label %doGC, label %afterCheck
     
 doGC:

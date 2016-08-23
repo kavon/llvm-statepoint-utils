@@ -11,7 +11,7 @@ typedef struct {
     // kind < 0 means this is a base pointer
     // kind >= 0 means this is a pointer derived from base pointer in slot number "kind"
     int32_t kind;    
-    int32_t offset;  // offsets are relative to the frame's base
+    int32_t offset;  // offsets are relative to return address of the frame (aka, the stack pointer).
 } pointer_slot_t;
 
 typedef struct {

@@ -3,7 +3,7 @@ GNU_SED := gsed
 
 all: a.out
 
-a.out: ../dist/llvm-statepoint-tablegen.a fib.o driver.o
+a.out: ../dist/llvm-statepoint-tablegen.a fib.o driver.o shim.s
 	clang $^
 
 fib.o: fib.ll
