@@ -13,12 +13,12 @@ extern uint32_t* heapPtr; // points at the first free spot in the heap
 bool tableBuilt = false;
 statepoint_table_t* table;
 
-void scanStack(void* stackPtr, statepoint_table_t* table) {
-    
+void relocate_uint32star(uint32_t** slot) {
+    // TODO
 }
 
 
-void doGC(void* stackPtr) {
+void doGC(uint8_t* stackPtr) {
     void* stackmap = (void*)&_LLVM_StackMaps;
     
     if(!tableBuilt) {
@@ -33,4 +33,25 @@ void doGC(void* stackPtr) {
     
     
     
+    // TODO make a new heap to relocate stuff to
+    
+    frame_info_t* frame = lookup_return_address(table, (uint64_t)stackPtr);
+    
+    while(frame != NULL) {
+        printf("found a frame, relocating its ptrs\n");
+        for(uint16_t i = 0; i < frame->numSlots; i++) {
+            pointer_slot_t ptrSlot = frame->slots[i];
+            if(ptrSlot.kind < 0) {
+                assert(false && "unexpected derived pointer\n");
+            }
+            uint32_t** ptr = (uint32_t**)(stackPtr + ptrSlot.offset);
+            relocate_uint32star(ptr);
+        }
+        
+        // move to next frame
+        stackPtr += frame->frameSize;
+        frame = lookup_return_address(table, (uint64_t)stackPtr);
+    }
+    
+    // TODO free the old heap and make new heap the current heap.
 }
