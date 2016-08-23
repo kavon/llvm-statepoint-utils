@@ -3,6 +3,9 @@ target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-macosx10.11.0"
 
 @heapPtr = common global i32 addrspace(1)* null, align 8
+@heapBase = common global i32 addrspace(1)* null, align 8
+@heapSizeB = global i64 12288, align 8
+
 @gcCounter = common global i32 0, align 8
 @.str = private unnamed_addr constant [14 x i8] c"fib(%d) = %d\0A\00", align 1
 
@@ -24,7 +27,7 @@ doGC:
     %gcRetTok = call token
               (i64, i32, void ()*, i32, i32, ...)
               @llvm.experimental.gc.statepoint.p0f_voidvoidf(
-                  i64 2863311530,      ; id
+                  i64 2863311530,      ; id = 0xAAAAAAAA
                   i32 0,      ; patch bytes 
                   
                   void ()* @enterGC,    ; function
@@ -79,7 +82,7 @@ r4:
   %retTok = call token
             (i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
             @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(
-                i64 3149642683,      ; id
+                i64 3149642683,      ; id = 0xBBBBBBBB
                 i32 0,      ; patch bytes 
                 
                 i32 addrspace(1)* (i32 addrspace(1)*)* @fib,    ; function
@@ -117,7 +120,7 @@ r4:
   %retTok2 = call token
             (i64, i32, i32 addrspace(1)* (i32 addrspace(1)*)*, i32, i32, ...)
             @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(
-                i64 3435973836,      ; id
+                i64 3435973836,      ; id = 0xCCCCCCCC
                 i32 0,      ; patch bytes 
                 
                 i32 addrspace(1)* (i32 addrspace(1)*)* @fib,    ; function
@@ -158,9 +161,11 @@ r23:
 
 ; Function Attrs: nounwind ssp uwtable
 define i32 @main() #0 gc "statepoint-example" {
-  %r1 = call i8 addrspace(1)* @malloc(i64 12288)
+  %r0 = load i64, i64* @heapSizeB, align 8
+  %r1 = call i8 addrspace(1)* @malloc(i64 %r0)
   %r2 = bitcast i8 addrspace(1)* %r1 to i32 addrspace(1)*
   store i32 addrspace(1)* %r2, i32 addrspace(1)** @heapPtr, align 8
+  store i32 addrspace(1)* %r2, i32 addrspace(1)** @heapBase, align 8
   %r3 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
   store i32 9, i32 addrspace(1)* %r3, align 4
   %r4 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
