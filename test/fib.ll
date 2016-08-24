@@ -17,8 +17,7 @@ declare token @llvm.experimental.gc.statepoint.p0f_p1i32p1i32f(i64, i32, i32 add
 declare i32 addrspace(1)* @llvm.experimental.gc.result.p1i32(token)
 declare i32 addrspace(1)*  @llvm.experimental.gc.relocate.p1i32(token, i32, i32) ; base idx, pointer idx
 
-; Function Attrs: nounwind ssp uwtable
-define i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedValParam) gc "statepoint-example" {
+define internal i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedValParam) gc "statepoint-example" {
 entry:
     ; %count = load i32, i32* @gcCounter
     %allocPtr = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr
