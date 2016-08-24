@@ -4,9 +4,10 @@ target triple = "x86_64-apple-macosx10.11.0"
 
 @heapPtr = common global i32 addrspace(1)* null, align 8
 @heapBase = common global i32 addrspace(1)* null, align 8
-@heapSizeB = global i64 12288, align 8
+; 4096 bytes is just enough for a depth of at least 50, will trigger a lot of GCs :)
+@heapSizeB = global i64 4096, align 8 
 
-@gcCounter = common global i32 0, align 8
+; @gcCounter = common global i32 0, align 8
 @.str = private unnamed_addr constant [14 x i8] c"fib(%d) = %d\0A\00", align 1
 
 declare void @enterGC()
@@ -17,10 +18,17 @@ declare i32 addrspace(1)* @llvm.experimental.gc.result.p1i32(token)
 declare i32 addrspace(1)*  @llvm.experimental.gc.relocate.p1i32(token, i32, i32) ; base idx, pointer idx
 
 ; Function Attrs: nounwind ssp uwtable
-define i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedValParam) #0 gc "statepoint-example" {
+define i32 addrspace(1)* @fib(i32 addrspace(1)* %boxedValParam) gc "statepoint-example" {
 entry:
-    %count = load i32, i32* @gcCounter
-    %cond = icmp sgt i32 %count, 11
+    ; %count = load i32, i32* @gcCounter
+    %allocPtr = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr
+    %basePtr = load i32 addrspace(1)*, i32 addrspace(1)** @heapBase
+    %allocPtr.v = ptrtoint i32 addrspace(1)* %allocPtr to i64
+    %basePtr.v = ptrtoint i32 addrspace(1)* %basePtr to i64
+    %usedSpace = sub i64 %allocPtr.v, %basePtr.v
+    %sz = load i64, i64* @heapSizeB
+    %max = sub i64 %sz, 128  ;; some head room
+    %cond = icmp sgt i64 %usedSpace, %max
     br i1 %cond, label %doGC, label %afterCheck
     
 doGC:
@@ -49,7 +57,7 @@ doGC:
               @llvm.experimental.gc.relocate.p1i32(token %gcRetTok, i32 7, i32 7)
               
     ; reset the count
-    store i32 0, i32* @gcCounter
+    ; store i32 0, i32* @gcCounter
     
     br label %afterCheck
     
@@ -57,9 +65,9 @@ afterCheck:
   %boxedVal = phi i32 addrspace(1)* [%boxedVal.afterGCRelo, %doGC], [%boxedValParam, %entry]
   
   ; increment the count
-  %z1 = load i32, i32* @gcCounter
-  %z2 = add i32 %z1, 1
-  store i32 %z2, i32* @gcCounter
+  ; %z1 = load i32, i32* @gcCounter
+  ; %z2 = add i32 %z1, 1
+  ; store i32 %z2, i32* @gcCounter
   
   %r1 = load i32, i32 addrspace(1)* %boxedVal, align 4
   %r2 = icmp sle i32 %r1, 1
@@ -160,32 +168,27 @@ r23:
 }
 
 ; Function Attrs: nounwind ssp uwtable
-define i32 @main() #0 gc "statepoint-example" {
+define i32 @main() gc "statepoint-example" {
   %r0 = load i64, i64* @heapSizeB, align 8
   %r1 = call i8 addrspace(1)* @malloc(i64 %r0)
   %r2 = bitcast i8 addrspace(1)* %r1 to i32 addrspace(1)*
   store i32 addrspace(1)* %r2, i32 addrspace(1)** @heapPtr, align 8
   store i32 addrspace(1)* %r2, i32 addrspace(1)** @heapBase, align 8
   %r3 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
-  store i32 9, i32 addrspace(1)* %r3, align 4
+  
+  ; fib(35) = 9227465
+  %n = bitcast i32 35 to i32
+  store i32 %n, i32 addrspace(1)* %r3, align 4
+  
   %r4 = load i32 addrspace(1)*, i32 addrspace(1)** @heapPtr, align 8
   %r5 = getelementptr inbounds i32, i32 addrspace(1)* %r4, i32 1
   store i32 addrspace(1)* %r5, i32 addrspace(1)** @heapPtr, align 8
   %r6 = call i32 addrspace(1)* @fib(i32 addrspace(1)* %r3)
   %r7 = load i32, i32 addrspace(1)* %r6, align 4
-  %r8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str, i32 0, i32 0), i32 9, i32 %r7)
+  %r8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str, i32 0, i32 0), i32 %n, i32 %r7)
   ret i32 0
 }
 
-declare i8 addrspace(1)* @malloc(i64) #1
+declare i8 addrspace(1)* @malloc(i64)
 
-declare i32 @printf(i8*, ...) #1
-
-attributes #0 = { nounwind ssp uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="core2" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+ssse3" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #1 = { "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="core2" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+ssse3" "unsafe-fp-math"="false" "use-soft-float"="false" }
-
-!llvm.module.flags = !{!0}
-!llvm.ident = !{!1}
-
-!0 = !{i32 1, !"PIC Level", i32 2}
-!1 = !{!"Apple LLVM version 7.3.0 (clang-703.0.29)"}
+declare i32 @printf(i8*, ...)

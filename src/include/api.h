@@ -10,9 +10,34 @@
 typedef struct {
     // kind < 0 means this is a base pointer
     // kind >= 0 means this is a pointer derived from base pointer in slot number "kind"
-    int32_t kind;    
-    int32_t offset;  // offsets are relative to return address of the frame (aka, the stack pointer).
+    int32_t kind;  
+    
+    // offsets are relative to the base of a frame. 
+    // See Figure 1 below for our defintion of "base"
+    int32_t offset;  
 } pointer_slot_t;
+
+/*
+
+                 FIGURE 1
+    Stack grows towards low addresses.
+
+high addresses
+
+ ... ETC ...
+-------------- <- base2
+frame 2's ret addr
+-------------- <- start of frame 2 (computed with: base1 + base1's frameSize)
+
+frame 1's contents
+
+-------------- <- base1, aka base for offsets into frame 1 (8 bytes above start of frame 1)
+frame 1's ret addr
+-------------- <- start of frame 1 (what you get immediately after a callq)
+
+low addresses
+
+*/
 
 typedef struct {
     // NOTE flags & calling convention didn't seem useful to include in the map.

@@ -24,11 +24,12 @@ int32_t convert_offset(value_location_t* p, uint64_t frameSize) {
     // registers and their corresponding Dwarf reg numbers
     switch(p->regNum) {
         case 7: // offset is relative to stack pointer
-            assert(p->offset > 0 && "unexpected offset!");
+            assert(p->offset >= 0 && "unexpected offset!");
             return p->offset;
             
-        case 6: // offset is relative to base pointer. NOTE untested
-            assert(p->offset < 0 && "unexpected offset!");
+        case 6: // offset is relative to base pointer. 
+                // NOTE haven't seen statepoints generate such offsets.
+            assert(p->offset <= 0 && "unexpected offset!");
             return ((int32_t)frameSize) + p->offset;
         
         default:
