@@ -194,6 +194,14 @@ callsite_header_t* next_callsite(callsite_header_t* callsite) {
 }
 
 statepoint_table_t* generate_table(void* map, float load_factor) {
+
+    uint8_t* version = (uint8_t*)map;
+    if (*version != 2) {
+        printf("error: only LLVM stackmap version 2 is supported.\n");
+        assert(false && "see above");
+        return NULL;
+    }
+
     stackmap_header_t* header = (stackmap_header_t*)map;
     uint64_t numCallsites = header->numRecords;
     
