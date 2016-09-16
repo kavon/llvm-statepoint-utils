@@ -16,7 +16,7 @@ Note that this library was designed to work for programs whose stack map informa
 
 #### how to build and use
 
-**NOTE: This code depends on a patch not yet merged into LLVM (see: https://reviews.llvm.org/D23487 )**
+*NOTE:* This code depends on a patch only available LLVM 4.0 or later (see: https://reviews.llvm.org/D23487 )
 
 1. Run ``make``
 2. Look inside ``dist`` and you should see a library file and a header file
