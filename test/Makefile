@@ -1,24 +1,22 @@
-# on OS X, install it from macports
-GNU_SED := gsed
-
-OPT_CLANG := -O3
+CC := gcc
+OPT_CC := -O3
 OPT_LLC := -O3
 
 all: a.out
 
 a.out: ../dist/llvm-statepoint-tablegen.a fib.o driver.o shim.s
-	clang $(OPT_CLANG) $^
+	$(CC) $(OPT_CC) $^
 
 fib.o: fib.ll
-	llc $(OPT_LLC) fib.ll
-	$(GNU_SED) "s/__LLVM_StackMaps:/	.globl __LLVM_StackMaps\n__LLVM_StackMaps:/" fib.s > fib_globl.s
-	clang $(OPT_CLANG) -c fib_globl.s -o fib.o
+	llc fib.ll -o fib.s
+	perl -i -pe "s/__LLVM_StackMaps:/.globl __LLVM_StackMaps\n__LLVM_StackMaps:/" fib.s
+	$(CC) -c fib.s -o fib.o
 
 driver.o: driver.c
-	clang $(OPT_CLANG) -c driver.c -o driver.o
+	$(CC) $(OPT_CC) -c driver.c -o driver.o
 
 ../dist/llvm-statepoint-tablegen.a:
 	cd .. && make
 
 clean:
-	rm -f fib.s fib_globl.s fib.o driver.o a.out
+	rm -f fib.s fib.o driver.o a.out
