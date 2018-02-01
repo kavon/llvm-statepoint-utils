@@ -9,14 +9,14 @@ This design is [intentional](http://llvm.org/docs/StackMaps.html#stack-map-forma
 encode the information in its own format."
 
 The utilities herein are designed to do just that: it can generate an efficient hash table at runtime that can be used by a garbage collector to walk the stack and find all pointers. 
-Generating the table at runtime works around [issues](https://en.wikipedia.org/wiki/Address_space_layout_randomization) with position independent code, or if that is disabled, having to do fancy linker tricks, since the table is keyed on absolute return addresses. 
+Generating the table at runtime works around [issues](https://en.wikipedia.org/wiki/Address_space_layout_randomization) with position independent code, since the table is keyed on absolute return addresses.
 The code is pure, unadulterated C99<sup>[*](#caveat)</sup> with no dependencies and a permissive license.
 
 Note that this library was designed to work for programs whose stack map information was generated solely by ``gc.statepoint`` intrinsics, as these intrinsics generate specially formatted stack map records. If you're mixing ``patchpoint`` or regular ``stackmap`` intrinsics in the same code, you might need to modify the library in addition to marking call sites to differentiate them from statepoints.
 
-#### how to build and use
+The currently supported [Stackmap Format](http://llvm.org/docs/StackMaps.html#stack-map-format) is version 3, which is found in LLVM 5+.
 
-*NOTE:* This code depends on a patch only available LLVM 4.0 or later (see: https://reviews.llvm.org/D23487 )
+#### how to build and use
 
 1. Run ``make``
 2. Look inside ``dist`` and you should see a library file and a header file
@@ -24,3 +24,19 @@ Note that this library was designed to work for programs whose stack map informa
 
 <a name="caveat">\*</a> *almost*... we rely on the [packed attribute](https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#Common-Type-Attributes)
  supported by popular C compilers (*i.e.,* clang and gcc).
+
+#### a fancier implementation
+
+To avoid having to generate the hash table each time the program starts up, you could extend
+this utility to instead generate a position-independent, static, callsite-offset table.
+For example, to lookup information about a callsite, we would:
+
+1.  Take the return address, and subtract from it the starting address of the `.text` section,
+    to obtain the callsite offset.
+    The starting address would change on each launch because of ASLR, 
+    but it can be determined once during program startup and saved to a global variable.
+    
+2.  Use the call-site offset as the key into the statically allocated table. There are
+    various ways of doing this, such as using a perfect hash function + a pointer array, 
+    or generating a standard hash table that is laid out statically in the data section.
+    
