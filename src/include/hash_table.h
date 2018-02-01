@@ -13,9 +13,7 @@
 
 statepoint_table_t* new_table(float loadFactor, uint64_t expectedElms);
 
-void insert_key(statepoint_table_t* table, uint64_t key, frame_info_t* value);
-
-/* lookup_return_address is declared in api.h */
+/* lookup_return_address & insert_key is declared in api.h */
 
 size_t size_of_frame(uint16_t numSlots);
 
