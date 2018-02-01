@@ -1,4 +1,5 @@
 #include "include/stackmap.h"
+#include "include/api.h"
 #include "include/hash_table.h"
 
 bool isBasePointer(value_location_t* first, value_location_t* second) {

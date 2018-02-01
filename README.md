@@ -24,6 +24,11 @@ The currently supported [Stackmap Format](http://llvm.org/docs/StackMaps.html#st
 
 <a name="caveat">\*</a> *almost*... we rely on the [packed attribute](https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#Common-Type-Attributes)
  supported by popular C compilers (*i.e.,* clang and gcc).
+ 
+#### including these utils in your project
+
+You can generate a single `.c` and corresponding `.h` file for inclusion in your own
+build system. To do this, run `make unified`, and the output code will be placed under `build/`.
 
 #### a fancier implementation
 

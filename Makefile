@@ -28,6 +28,15 @@ dist/llvm-statepoint-tablegen.a: $(C_DEPS)
 # $< gives first prereq
 $(BUILD_ROOT)/%.o: $(SRC_ROOT)/%.c $(HEADERS)
 	$(CC) $(FLAGS) -c $< -o $@
+	
+unified:
+	# roll together the headers. api.h needs to come first so we sort the headers.
+	cat $(sort $(HEADERS)) >> $(BUILD_ROOT)/statepoint.h
+	# make the C file
+	echo "#include \"statepoint.h\"" > $(BUILD_ROOT)/statepoint.c
+	sed -E -e "s:[[:space:]]*#include[[:space:]]+\"include/.+\":// include auto-removed:g" $(C_SRCS) >> $(BUILD_ROOT)/statepoint.c
+	# ensure that it compiles
+	$(CC) -c $(BUILD_ROOT)/statepoint.c -o $(BUILD_ROOT)/statepoint.o
 
 clean:
 	rm -f build/*

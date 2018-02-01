@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "api.h"
-
 /** Functions **/
 
 statepoint_table_t* new_table(float loadFactor, uint64_t expectedElms);

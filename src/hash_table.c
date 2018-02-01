@@ -1,4 +1,6 @@
+#include "include/api.h"
 #include "include/hash_table.h"
+
 
 /**
  * The hash function used to distribute keys uniformly across the table.
