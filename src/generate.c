@@ -179,15 +179,19 @@ callsite_header_t* next_callsite(callsite_header_t* callsite) {
     value_location_t* locations = (value_location_t*)(callsite + 1);
     locations += numLocations;
     
-    liveout_header_t* liveout_header = (liveout_header_t*)locations;
+    // realign pointer at the end of the locations to 8 byte alignment.
+    uint64_t ptr_val = (uint64_t)locations;
+    ptr_val = (ptr_val + 7) & ~0x7;
+    
+    liveout_header_t* liveout_header = (liveout_header_t*)ptr_val;
     uint16_t numLiveouts = liveout_header->numLiveouts;
     
     // skip over liveouts
     liveout_location_t* liveouts = (liveout_location_t*)(liveout_header + 1);
     liveouts += numLiveouts;
     
-    // realign pointer to 8 byte alignment.
-    uint64_t ptr_val = (uint64_t)liveouts;
+    // realign pointer again to 8 byte alignment for the next record.
+    ptr_val = (uint64_t)liveouts;
     ptr_val = (ptr_val + 7) & ~0x7;
     
     return (callsite_header_t*)ptr_val;
@@ -196,13 +200,17 @@ callsite_header_t* next_callsite(callsite_header_t* callsite) {
 statepoint_table_t* generate_table(void* map, float load_factor) {
 
     uint8_t* version = (uint8_t*)map;
-    if (*version != 2) {
-        printf("error: only LLVM stackmap version 2 is supported.\n");
+    if (*version != 3) {
+        printf("error: only LLVM stackmap version 3 is supported.\n");
         assert(false && "see above");
         return NULL;
     }
 
     stackmap_header_t* header = (stackmap_header_t*)map;
+    
+    assert(header->reserved1 == 0 && "expected to be 0");
+    assert(header->reserved2 == 0 && "expected to be 0");
+    
     uint64_t numCallsites = header->numRecords;
     
     statepoint_table_t* table = new_table(load_factor, numCallsites);

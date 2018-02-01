@@ -32,12 +32,14 @@
     callsite_header_t;
 
     value_location_t[numLocations];
+    
+    << upto 4 bytes of padding, as needed, to achieve 8 byte alignment >>
 
     liveout_header_t;
 
     liveout_location_t[numLiveouts];
 
-    upto 4 bytes of padding, as needed, to achieve 8 byte alignment;
+    << upto 4 bytes of padding, as needed, to achieve 8 byte alignment >>
 }
  
  ******** END OF LAYOUT ********/
@@ -74,8 +76,10 @@ typedef enum {
 
 typedef struct __attribute__((packed)) {
     uint8_t kind;       // possibilities come from location_kind_t, but is one byte in size.
-    uint8_t flags;
+    uint8_t flags;      // expected to be 0
+    uint16_t locSize;
     uint16_t regNum;    // Dwarf register num
+    uint16_t reserved;  // expected to be 0
     int32_t offset;     // either an offset or a "Small Constant"
 } value_location_t;
 
