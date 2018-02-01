@@ -1,6 +1,5 @@
 #include "include/stackmap.h"
 #include "include/hash_table.h"
-#include <stdbool.h>
 
 bool isBasePointer(value_location_t* first, value_location_t* second) {
     return first->kind == second->kind 

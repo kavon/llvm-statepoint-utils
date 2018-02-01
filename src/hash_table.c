@@ -1,9 +1,5 @@
 #include "include/hash_table.h"
 
-// for PRIu and PRId
-#define __STDC_FORMAT_MACROS 1
-#include <inttypes.h>
-
 /**
  * The hash function used to distribute keys uniformly across the table.
  * The implementation is one round of the xorshift64* algorithm.

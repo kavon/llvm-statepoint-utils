@@ -1,6 +1,9 @@
 #ifndef __LLVM_STATEPOINT_UTILS_HASH_TABLE__
 #define __LLVM_STATEPOINT_UTILS_HASH_TABLE__
 
+#define __STDC_FORMAT_MACROS 1
+#include <inttypes.h>
+
 #include <stdint.h>
 #include <stddef.h>
 #include <assert.h>
