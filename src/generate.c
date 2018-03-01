@@ -33,10 +33,9 @@ int32_t convert_offset(value_location_t* p, uint64_t frameSize) {
             return ((int32_t)frameSize) + p->offset;
         
         default:
-            assert(false && "offset is not relative to some part of the frame!");
-            // be nice if C had exceptions. let's hope an unusual offset
-            // catches someone's eye.
-            return 123456789;
+            fprintf(stderr, "(statepoint-utils) error: \
+                            \n\toffset is not relative to some part of the frame!\n");
+            exit(1);
     }
 }
 
@@ -96,11 +95,11 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
     
     assert((numLocations % 2) == 0 && "all of the pointer locations come in pairs!");
     uint16_t numSlots = numLocations / 2; 
+    uint16_t numActualFrameSlots = numSlots;
     
     frame_info_t* frame = malloc(size_of_frame(numSlots));
     frame->retAddr = retAddr;
     frame->frameSize = frameSize;
-    frame->numSlots = numSlots;
     
     // now to initialize the slots, we need to make two passes in order to put
     // base pointers first, then derived pointers.
@@ -111,8 +110,15 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
         value_location_t* base = (value_location_t*)(locations);
         value_location_t* derived = (value_location_t*)(locations + 1);
         
-        // we check that all locations are indirects.
-        assert(isIndirect(base) && isIndirect(derived) && "uh oh");
+        // all locations must be indirects in order for it to be in the frame.
+        if (! (isIndirect(base) && isIndirect(derived)) ) {
+#ifndef NDEBUG
+            fprintf(stderr, "(statepoint-utils) warning: \n\t skipping a root location! \
+                            base kind: %i, derived kind: %i\n", base->kind, derived->kind);
+#endif
+            numActualFrameSlots--;
+            continue;
+        }
         
         if( ! isBasePointer(base, derived)) {
             continue;
@@ -130,6 +136,9 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
         currentSlot++;
     }
     
+    // once we've filtered out locations that are not within the frame, we can set this.
+    frame->numSlots = numActualFrameSlots;
+    
     // now we do the derived pointers. we already know all locations are indirects now.
     locations = start;
     pointer_slot_t* processedBase = frame->slots;
@@ -137,8 +146,11 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
         value_location_t* base = (value_location_t*)(locations);
         value_location_t* derived = (value_location_t*)(locations + 1);
         
-        if(isBasePointer(base, derived)) {
-            // already processed
+        if (! isIndirect(base) ) // skipped in the first pass.
+            continue;
+        
+        if (isBasePointer(base, derived)) {
+            // already processed, or derived is not an indirect.
             continue;
         }
         
@@ -154,7 +166,11 @@ frame_info_t* generate_frame_info(callsite_header_t* callsite, function_info_t* 
         }
         
         // something's gone awry, let's bail!
-        assert(found && "uh oh");
+        if (!found) {
+            fprintf(stderr, "(statepoint-utils) error: \
+                             \n\tcouldn't find base for derived ptr!\n");
+            exit(1);
+        }
         
         // save the derived pointer's info
         pointer_slot_t newSlot;
