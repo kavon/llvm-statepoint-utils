@@ -1,7 +1,4 @@
 
-target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-apple-macosx10.11.0"
-
 @heapPtr = common global i32 addrspace(1)* null, align 8
 @heapBase = common global i32 addrspace(1)* null, align 8
 ; 4096 bytes is just enough for a depth of at least 50, will trigger a lot of GCs :)
