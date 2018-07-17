@@ -1,0 +1,25 @@
+language: c
+
+dist: trusty
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+addons:
+  apt:
+    sources:
+      - llvm-toolchain-trusty-6.0
+    packages:
+      - llvm-6.0-tools
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update         ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install llvm@5 ; fi
+
+script:
+  - ./test/run.sh

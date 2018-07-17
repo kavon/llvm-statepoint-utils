@@ -2,3 +2,4 @@ fib.s
 fib.o
 driver.o
 a.out
+output.txt
