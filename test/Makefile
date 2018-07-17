@@ -8,7 +8,7 @@ a.out: fib.o driver.o shim.S ../dist/llvm-statepoint-tablegen.a
 	$(CC) $(OPT_CC) $^
 
 fib.o: fib.ll
-	llc $(OPT_LLC) fib.ll -o fib.s
+	clang -S $(OPT_LLC) fib.ll -o fib.s
 	perl -i -pe "s/__LLVM_StackMaps:/.globl __LLVM_StackMaps\n__LLVM_StackMaps:/" fib.s
 	$(CC) $(OPT_CC) -c fib.s -o fib.o
 

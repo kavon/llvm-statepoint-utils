@@ -8,18 +8,18 @@ os:
 
 compiler:
   - gcc
-  - clang
 
 addons:
   apt:
     sources:
+      - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty-6.0
     packages:
-      - llvm-6.0-tools
+      - clang-6.0
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update         ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install llvm@5 ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install llvm@6 --with-clang ; fi
 
 script:
   - ./test/run.sh
