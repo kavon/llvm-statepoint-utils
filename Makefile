@@ -6,10 +6,10 @@
 # - Require compiler support for packed structures via __attribute__((packed))
 #
 
-CC := clang
+CC := cc
 OPT := -O3
 #OPT := -g
-FLAGS := -Wall -Wextra -Werror -Wpedantic -std=c99 $(OPT)
+FLAGS := -Wall -Wextra -Werror -Wpedantic -std=c99 -fPIC $(OPT)
 
 SRC_ROOT := src
 C_SRCS := $(shell find $(SRC_ROOT) -name '*.c')
@@ -19,16 +19,16 @@ C_DEPS := $(C_SRCS:$(SRC_ROOT)/%.c=$(BUILD_ROOT)/%.o)
 
 HEADERS := $(shell find $(SRC_ROOT) -name '*.h')
 
-dist/llvm-statepoint-tablegen.h: dist/llvm-statepoint-tablegen.a 
+dist/llvm-statepoint-tablegen.h: dist/llvm-statepoint-tablegen.a
 	cp $(SRC_ROOT)/include/api.h $@
 
 dist/llvm-statepoint-tablegen.a: $(C_DEPS)
 	ar rvs $@ $^
-	
+
 # $< gives first prereq
 $(BUILD_ROOT)/%.o: $(SRC_ROOT)/%.c $(HEADERS)
 	$(CC) $(FLAGS) -c $< -o $@
-	
+
 unified:
 	# roll together the headers. api.h needs to come first so we sort the headers.
 	cat $(sort $(HEADERS)) > $(BUILD_ROOT)/statepoint.h
@@ -36,7 +36,7 @@ unified:
 	echo "#include \"statepoint.h\"" > $(BUILD_ROOT)/statepoint.c
 	sed -E -e "s:[[:space:]]*#include[[:space:]]+\"include/.+\":// include auto-removed:g" $(C_SRCS) >> $(BUILD_ROOT)/statepoint.c
 	# ensure that it compiles
-	$(CC) -c $(BUILD_ROOT)/statepoint.c -o $(BUILD_ROOT)/statepoint.o
+	$(CC) $(FLAGS) -c $(BUILD_ROOT)/statepoint.c -o $(BUILD_ROOT)/statepoint.o
 	tar cvf unified-source.tar $(BUILD_ROOT)/statepoint.c $(BUILD_ROOT)/statepoint.h
 
 clean:
