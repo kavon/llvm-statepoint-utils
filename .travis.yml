@@ -4,7 +4,7 @@ dist: trusty
 
 os:
   - linux
-#  - osx
+  - osx
 
 compiler:
   - gcc
@@ -21,7 +21,8 @@ addons:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update         ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install llvm@6 --with-clang ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install llvm@6 --with-toolchain ; fi
 
 script:
   - ./test/run.sh
+  - make unified
