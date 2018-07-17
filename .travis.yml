@@ -4,7 +4,12 @@ dist: trusty
 
 os:
   - linux
-  - osx
+  # - osx
+
+# TODO I think the only sensible way to get macOS testing to work is if
+# we have a script that downloads and extracts a pre-built LLVM, since
+# homebrew seems to either build from source, or somehow doesn't have
+# llc available (maybe it's just not in your path though?)
 
 compiler:
   - gcc
