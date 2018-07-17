@@ -4,7 +4,7 @@ dist: trusty
 
 os:
   - linux
-  - osx
+#  - osx
 
 compiler:
   - gcc
@@ -16,6 +16,8 @@ addons:
       - llvm-toolchain-trusty-6.0
     packages:
       - clang-6.0
+      - llvm-6.0-dev
+      - llvm-6.0-tools
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update         ; fi
