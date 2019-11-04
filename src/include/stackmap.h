@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/** 
+/**
  * LLVM's Documentation: http://llvm.org/docs/StackMaps.html#stack-map-format
  *
  *  "The runtime must be able to interpret the stack map record given only the ID,
@@ -13,26 +13,26 @@
  *  We interpret "order of the locations" to mean that not only are callsite records
  *  cooresponding to a function grouped together and ordered from least to greatest
  *  offset, but these callsite groups are also in the same order as the array of
- *  function stack size records. 
- * 
- *  This appears to be the case in LLVM, and indeed, these assumptions are nessecary to 
+ *  function stack size records.
+ *
+ *  This appears to be the case in LLVM, and indeed, these assumptions are nessecary to
  *  figure out what groups correspond to which functions (without abusing the ID field
  *  with a post processing script) to compute the return addresses.
  */
- 
+
  /******** LAYOUT ********
- 
+
  stackmap_header_t;
- 
+
  function_info_t[numFunctions];
- 
+
  uint64_t[numConstants];
- 
+
  numRecords of the following {
     callsite_header_t;
 
     value_location_t[numLocations];
-    
+
     << upto 4 bytes of padding, as needed, to achieve 8 byte alignment >>
 
     liveout_header_t;
@@ -41,7 +41,7 @@
 
     << upto 4 bytes of padding, as needed, to achieve 8 byte alignment >>
 }
- 
+
  ******** END OF LAYOUT ********/
 
 typedef struct __attribute__((packed)) {

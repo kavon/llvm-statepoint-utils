@@ -9,13 +9,13 @@
  */
 uint64_t hashFn(uint64_t x) {
     x ^= x >> 12; // a
-	x ^= x << 25; // b
-	x ^= x >> 27; // c
-	return x * UINT64_C(2685821657736338717);
+    x ^= x << 25; // b
+    x ^= x >> 27; // c
+    return x * UINT64_C(2685821657736338717);
 }
 
 uint64_t computeBucketIndex(statepoint_table_t* table, uint64_t key) {
-    // Using modulo may introduce a little bias in the table. 
+    // Using modulo may introduce a little bias in the table.
     // If you care, use the unbiased version that's floating around the internet.
     return hashFn(key) % table->size;
 }
@@ -38,18 +38,18 @@ frame_info_t* next_frame(frame_info_t* cur) {
 statepoint_table_t* new_table(float loadFactor, uint64_t expectedElms) {
     assert(loadFactor > 0 && "must be positive");
     assert(expectedElms > 0 && "must be positive");
-    
+
     uint64_t numBuckets = (expectedElms / loadFactor) + 1;
-    
+
     table_bucket_t* buckets = calloc(numBuckets, sizeof(table_bucket_t));
     assert(buckets && "bad alloc");
-    
+
     statepoint_table_t* table = malloc(sizeof(statepoint_table_t));
     assert(table && "bad alloc");
-    
+
     table->size = numBuckets;
     table->buckets = buckets;
-    
+
     return table;
 }
 
@@ -72,27 +72,27 @@ void destroy_table(statepoint_table_t* table) {
 void insert_key(statepoint_table_t* table, uint64_t key, frame_info_t* value) {
     uint64_t idx = computeBucketIndex(table, key);
     table_bucket_t *bucket = table->buckets + idx;
-    
+
     if(bucket->numEntries == 0) {
         bucket->numEntries = 1;
         bucket->sizeOfEntries = frame_size(value);
-        bucket->entries = value; 
+        bucket->entries = value;
     } else {
         // a collision occured!
         size_t newSize = bucket->sizeOfEntries + frame_size(value);
         frame_info_t* newEntries = realloc(bucket->entries, newSize);
-        
+
         assert(newEntries && "bad alloc");
-        
+
         // copy value onto the end of the possibly resized entry array
         frame_info_t* oldEnd = (frame_info_t*)(
             ((uint8_t*)newEntries) + bucket->sizeOfEntries
         );
-        
+
         memmove(oldEnd, value, frame_size(value));
-        
+
         free(value);
-        
+
         bucket->entries = newEntries;
         bucket->sizeOfEntries = newSize;
         bucket->numEntries += 1;
@@ -103,17 +103,17 @@ void insert_key(statepoint_table_t* table, uint64_t key, frame_info_t* value) {
 frame_info_t* lookup_return_address(statepoint_table_t *table, uint64_t retAddr) {
     uint64_t idx = computeBucketIndex(table, retAddr);
     table_bucket_t bucket = table->buckets[idx];
-    
+
     uint16_t bucketLimit = bucket.numEntries;
     frame_info_t* entries = bucket.entries;
-    
+
     for(uint16_t i = 0; i < bucketLimit; i++) {
         if(entries->retAddr == retAddr) {
             return entries;
         }
         entries = next_frame(entries);
     }
-    
+
     return NULL;
 }
 
@@ -122,15 +122,15 @@ void print_table(FILE *stream, statepoint_table_t* table, bool skip_empty) {
         uint16_t numEntries = table->buckets[i].numEntries;
         size_t sizeOfEntries = table->buckets[i].sizeOfEntries;
         frame_info_t* entry = table->buckets[i].entries;
-        
+
         if(skip_empty && numEntries == 0) {
             continue;
         }
-        
+
         fprintf(stream, "\n--- bucket #%" PRIu64 "---\n", i);
         fprintf(stream, "num entries: %" PRIu16 ", ", numEntries);
         fprintf(stream, "memory allocated (bytes): %" PRIuPTR "\n", sizeOfEntries);
-        
+
         for(uint16_t i = 0; i < numEntries; i++, entry = next_frame(entry)) {
             fprintf(stream, "\t** frame #%" PRIu16 "**\n", i);
             print_frame(stream, entry);
@@ -142,21 +142,21 @@ void print_table(FILE *stream, statepoint_table_t* table, bool skip_empty) {
 void print_frame(FILE *stream, frame_info_t* frame) {
     fprintf(stream, "\t\treturn address: 0x%" PRIX64 "\n", frame->retAddr);
     fprintf(stream, "\t\tframe size: %" PRIu64 "\n", frame->frameSize);
-    
+
     uint16_t numSlots = frame->numSlots;
     pointer_slot_t* curSlot = frame->slots;
     fprintf(stream, "\t\tnum live ptrs: %" PRIu16 "\n", numSlots);
-    
+
     for(uint16_t i = 0; i < numSlots; i++, curSlot++) {
         fprintf(stream, "\t\tptr slot #%" PRIu16 " { ", i);
-        
+
         int32_t kind = curSlot->kind;
         if(kind < 0) {
             fprintf(stream, "kind: base ptr, ");
         } else {
             fprintf(stream, "kind: ptr derived from slot #%" PRId32 ", ", kind);
         }
-        
+
         fprintf(stream, "frame offset: %" PRId32 " }\n", curSlot->offset);
     }
 }

@@ -10,11 +10,11 @@
 typedef struct {
     // kind < 0 means this is a base pointer
     // kind >= 0 means this is a pointer derived from base pointer in slot number "kind"
-    int32_t kind;  
-    
-    // offsets are relative to the base of a frame. 
+    int32_t kind;
+
+    // offsets are relative to the base of a frame.
     // See Figure 1 below for our defintion of "base"
-    int32_t offset;  
+    int32_t offset;
 } pointer_slot_t;
 
 /*
@@ -43,12 +43,12 @@ typedef struct {
     // NOTE flags & calling convention didn't seem useful to include in the map.
     uint64_t retAddr;
     uint64_t frameSize;     // in bytes
-    
+
     // all base pointers come before derived pointers in the slot array. you can use this
     // fact to quickly update the derived pointers by referring back to the base pointers
     // while scanning the slots.
     uint16_t numSlots;
-    pointer_slot_t slots[];  
+    pointer_slot_t slots[];
 } frame_info_t;
 
 
@@ -59,7 +59,7 @@ typedef struct {
 } table_bucket_t;
 
 typedef struct {
-    uint64_t size; 
+    uint64_t size;
     table_bucket_t* buckets;
 } statepoint_table_t;
 
@@ -84,7 +84,7 @@ frame_info_t* lookup_return_address(statepoint_table_t *table, uint64_t retAddr)
 /**
  * Given an LLVM generated Stack Map, will returns a hash table mapping return addresses
  * to a frame_info_t struct that provides information about live pointer locations within
- * that stack frame. 
+ * that stack frame.
  *
  * - The map is the LLVM Stack Map generated via gc.statepoint.
  * - The load factor allows you to tune the amount of hash collisions in the table. Lower
