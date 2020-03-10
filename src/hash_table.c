@@ -2,7 +2,7 @@
 #include "include/hash_table.h"
 
 // when debugging is enabled, don't inline
-#ifndef NDEBUG
+#ifdef NDEBUG
   #define INLINE inline
 #else
   #define INLINE
