@@ -8,7 +8,13 @@ set -ex
 
 pushd $DIR
 
-make all
+OPT_FLAG="-O0 -g" make all
 ./a.out > output.txt
-
 grep 'fib(35) = 9227465' < output.txt
+make clean
+
+
+OPT_FLAG="-O3 -DNDEBUG" make all
+./a.out > output.txt
+grep 'fib(35) = 9227465' < output.txt
+make clean

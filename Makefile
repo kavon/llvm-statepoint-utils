@@ -7,8 +7,7 @@
 #
 
 CC := cc
-OPT := -O3
-#OPT := -g
+OPT := ${OPT_FLAG}
 FLAGS := -Wall -Wextra -Werror -Wpedantic -std=c99 -fPIC $(OPT)
 
 SRC_ROOT := src

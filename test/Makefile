@@ -1,6 +1,6 @@
 CC := cc
-OPT_CC := -O3 -fPIC
-OPT_LLC := -O3 -relocation-model=pic
+OPT_CC := ${OPT_FLAG} -fPIC
+OPT_LLC := -relocation-model=pic
 LD_FLAGS := -lm
 
 all: statepoints a.out
@@ -20,4 +20,4 @@ statepoints:
 	cd .. && make
 
 clean:
-	rm -f fib.s fib.o driver.o a.out output.txt
+	rm -f fib.s fib.o driver.o a.out output.txt && cd .. && make clean

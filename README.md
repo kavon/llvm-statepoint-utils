@@ -20,7 +20,7 @@ The currently supported [Stackmap Format](http://llvm.org/docs/StackMaps.html#st
 
 #### how to build and use
 
-1. Run ``make``
+1. Run ``OPT_FLAG="-O3 -DNDEBUG" make``
 2. Look inside ``dist`` and you should see a library file and a header file
 3. Enjoy
 
